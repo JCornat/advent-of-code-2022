@@ -1,40 +1,39 @@
 fun main() {
-    fun part1(input: List<String>): Int {
-        return input.size
+    fun part1(elfList: MutableList<Int>, input: List<String>): Int {
+        var weight = 0
+        for (line in input) {
+            if (line == "") {
+                elfList.add(weight)
+                weight = 0
+                continue
+            }
+
+            weight += line.toInt()
+        }
+
+        elfList.add(weight) // When loop is over, add the last elf
+
+        elfList.sortDescending()
+        return elfList.first()
     }
 
-    fun part2(input: List<String>): Int {
-        return input.size
-    }
+    fun part2(elfList: MutableList<Int>): Int {
+        var res = 0
+        elfList.slice(0 .. 2)
+            .forEach {
+                res += it
+            }
 
-    // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day01_test")
-    // check(part1(testInput) == 1)
+        return res
+    }
 
     val input = readInput("Day01")
-    val mutableList = mutableListOf<Int>()
-    var weight = 0
-    for (a in input) {
-        if (a == "") {
-            mutableList.add(weight)
-            weight = 0
-            continue
-        }
+//    val input = readInput("Day01_test")
 
-        weight += a.toInt()
-    }
-
-    mutableList.add(weight) // When loop is over, add the last elf
-
-    mutableList.sortDescending()
-    val totalCalories = mutableList.first()
+    val elfList = mutableListOf<Int>()
+    val totalCalories = part1(elfList, input)
     println("How many total Calories is that Elf carrying? $totalCalories")
 
-    var top3 = 0
-    mutableList.slice(0 .. 2)
-        .forEach {
-            top3 += it
-        }
-
-    println("How many Calories are those Elves carrying in total? $top3")
+    val top3Calories = part2(elfList)
+    println("How many Calories are those Elves carrying in total? $top3Calories")
 }
