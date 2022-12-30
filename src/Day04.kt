@@ -11,62 +11,82 @@ fun main() {
 
     fun isContained(section: Pair<Int, Int>, value: Int): Boolean {
         if (value < section.first) {
-            return false;
-        }
-
-        if (value > section.second) {
-            return false;
-        }
-
-        return true;
-    }
-
-    fun checkOverlap(leftSection: Pair<Int, Int>, rightSection: Pair<Int, Int>): Boolean {
-        var lowerSection: Pair<Int, Int>
-        var higherSection: Pair<Int, Int>
-        if (leftSection.first < rightSection.first) {
-            lowerSection = leftSection
-            higherSection = rightSection
-        } else {
-            lowerSection = rightSection
-            higherSection = leftSection
-        }
-
-        if (!isContained(lowerSection, higherSection.first)) {
             return false
         }
 
-        if (!isContained(lowerSection, higherSection.second)) {
+        if (value > section.second) {
             return false
         }
 
         return true
     }
 
+    fun checkFullContain(leftSection: Pair<Int, Int>, rightSection: Pair<Int, Int>): Boolean {
+        if (isContained(leftSection, rightSection.first) && isContained(leftSection, rightSection.second)) {
+            return true
+        }
+
+        if (isContained(rightSection, leftSection.first) && isContained(rightSection, leftSection.second)) {
+            return true
+        }
+
+        return false
+    }
+
+    fun checkOverlap(leftSection: Pair<Int, Int>, rightSection: Pair<Int, Int>): Boolean {
+        if (isContained(leftSection, rightSection.first)) {
+            return true
+        }
+
+        if (isContained(leftSection, rightSection.second)) {
+            return true
+        }
+
+        if (isContained(rightSection, leftSection.first)) {
+            return true
+        }
+
+        if (isContained(rightSection, leftSection.second)) {
+            return true
+        }
+
+        return false
+    }
+
     fun part1(input: List<String>): Int {
-        var overlaps = 0
+        var totalContains = 0
+        for (line in input) {
+            val (leftSection, rightSection) = parseSections(line)
+            if (!checkFullContain(leftSection, rightSection)) {
+                continue
+            }
+
+            totalContains++
+        }
+
+        return totalContains
+    }
+
+    fun part2(input: List<String>): Int {
+        var totalContains = 0
         for (line in input) {
             val (leftSection, rightSection) = parseSections(line)
             if (!checkOverlap(leftSection, rightSection)) {
                 continue
             }
 
-            overlaps++
+            totalContains++
         }
 
-        return overlaps
-    }
-
-    fun part2(input: List<String>): Int {
-        return input.size
+        return totalContains
     }
 
     val input = readInput("Day04")
 //    val input = readInput("Day04_test")
 
-    val assignments = part1(input)
-    println("In how many assignment pairs does one range fully contain the other? $assignments")
+    val totalContains = part1(input)
+    println("In how many assignment pairs does one range fully contain the other? $totalContains")
 
-//    val score2 = part2(input)
-//    println("Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide? $score2")
+    val totalOverlaps = part2(input)
+    println("In how many assignment pairs do the ranges overlap? $totalOverlaps")
 }
