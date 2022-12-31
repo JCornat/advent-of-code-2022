@@ -7,16 +7,23 @@ fun main() {
 
     fun formatStacks(stacks: MutableList<MutableList<String>>, columnCount: Int): MutableList<MutableList<String>> {
         var res = mutableListOf<MutableList<String>>()
-        for (stack in stacks) {
-            val difference = columnCount - stack.size
-            if (difference == 0) {
-                continue
+        for (i in 0 until columnCount) {
+            var line = mutableListOf<String>()
+            for (j in stacks.size - 1 downTo 0) {
+                var stack = stacks.getOrNull(j)
+                if (stack == null) {
+                    break
+                }
+
+                val value = stack.getOrNull(i)
+                if (value == null || value == "") {
+                    continue
+                }
+
+                line.add(value)
             }
 
-            check(difference > 0)
-
-            var stackLine = (List(difference) { "" }).toMutableList()
-            stack.addAll(stackLine)
+            res.add(line)
         }
 
         return res
@@ -49,8 +56,8 @@ fun main() {
         }
 
         val count = result!!.groupValues[1].toInt()
-        val source = result!!.groupValues[2].toInt()
-        val target = result!!.groupValues[3].toInt()
+        val source = result!!.groupValues[2].toInt() - 1
+        val target = result!!.groupValues[3].toInt() - 1
         return Step(count, source, target)
     }
 
@@ -88,7 +95,7 @@ fun main() {
                 }
                 "row" -> {
                     val columnCount = parseColumnCount(line)
-                    formatStacks(stacks, columnCount)
+                    stacks = formatStacks(stacks, columnCount)
                 }
                 "step" -> {
                     check(stacks.size > 0)
@@ -102,28 +109,65 @@ fun main() {
         return Pair(stacks, steps)
     }
 
-    fun part1(input: List<String>): List<String> {
-        parseInput(input)
-        var topCrates = mutableListOf<String>()
-
-        return topCrates.toList()
+    fun executeSteps(stacks: MutableList<MutableList<String>>, steps: MutableList<Step>) {
+        for (step in steps) {
+            for (i in 0 until step.count) {
+                var source = stacks.get(step.source)
+                var target = stacks.get(step.target)
+                var item = source.removeLast()
+                target.add(item)
+            }
+        }
     }
 
-    fun part2(input: List<String>): List<String> {
-        var topCrates = mutableListOf<String>()
-        for (line in input) {
+    fun executeSteps2(stacks: MutableList<MutableList<String>>, steps: MutableList<Step>) {
+        for (step in steps) {
+            var tmpList = mutableListOf<String>()
+            for (i in 0 until step.count) {
+                var source = stacks.get(step.source)
+                var item = source.removeLast()
+                tmpList.add(item)
+            }
 
+            for (i in 0 until step.count) {
+                var target = stacks.get(step.target)
+                var item = tmpList.removeLast()
+                target.add(item)
+            }
+        }
+    }
+
+    fun getTopStack(stacks: MutableList<MutableList<String>>): MutableList<String> {
+        var res = mutableListOf<String>()
+        for (stack in stacks) {
+            res.add(stack.last())
         }
 
-        return topCrates.toList()
+        return res
     }
 
-//    val input = readInput("Day05")
-    val input = readInput("Day05_test")
+    fun part1(input: List<String>): MutableList<String> {
+        val parsedInput = parseInput(input)
+        var stacks = parsedInput.first
+        var steps = parsedInput.second
+        executeSteps(stacks, steps)
+        return getTopStack(stacks)
+    }
+
+    fun part2(input: List<String>): MutableList<String> {
+        val parsedInput = parseInput(input)
+        var stacks = parsedInput.first
+        var steps = parsedInput.second
+        executeSteps2(stacks, steps)
+        return getTopStack(stacks)
+    }
+
+    val input = readInput("Day05")
+//    val input = readInput("Day05_test")
 
     val topStack = part1(input)
-    println("After the rearrangement procedure completes, what crate ends up on top of each stack? $topStack")
+    println("After the rearrangement procedure completes, what crate ends up on top of each stack? ${topStack.joinToString("")}")
 
-    val totalOverlaps = part2(input)
-    println("In how many assignment pairs do the ranges overlap? $totalOverlaps")
+    val topStack2 = part2(input)
+    println("After the rearrangement procedure completes, what crate ends up on top of each stack? ${topStack2.joinToString("")}")
 }
