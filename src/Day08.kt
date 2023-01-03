@@ -1,10 +1,14 @@
 fun main() {
-    fun parseMap(input: List<String>): List<List<Int>> {
-        var map: MutableList<List<Int>> = mutableListOf()
+    data class Cell(val height: Int, var visible: Boolean)
+
+    fun parseMap(input: List<String>): List<List<Cell>> {
+        var map: MutableList<List<Cell>> = mutableListOf()
         for (line in input) {
-            var list = mutableListOf<Int>()
+            var list = mutableListOf<Cell>()
             for (item in line) {
-                list.add(item.digitToInt())
+                val height = item.digitToInt()
+                val cell = Cell(height, false)
+                list.add(cell)
             }
 
             map.add(list)
@@ -13,50 +17,40 @@ fun main() {
         return map
     }
 
-    fun isVisible(map: List<List<Int>>, x: Int, y: Int): Boolean {
-        val line = map.get(y)
-        if (y == 0 || y == map.size - 1) {
-            return true
+    fun detectVisibleOnLine(list: List<Cell>) {
+        var maxHeight = -1
+        for (cell in list) {
+            if (cell.height > maxHeight) {
+                maxHeight = cell.height
+                cell.visible = true
+            }
         }
-
-        if (x == 0 || x == line.size - 1) {
-            return true
-        }
-
-        val cell = line.get(x)
-        val topLine = map.get(y - 1)
-        val topCell = topLine.get(x)
-        if (cell > topCell) {
-            return true
-        }
-
-        val rightCell = line.get(x + 1)
-        if (cell > rightCell) {
-            return true
-        }
-
-        val leftCell = line.get(x - 1)
-        if (cell > leftCell) {
-            return true
-        }
-
-        val bottomLine = map.get(y + 1)
-        val bottomCell = bottomLine.get(x)
-        if (cell > bottomCell) {
-            return true
-        }
-
-        return false
     }
 
-    fun countTotalVisible(map: List<List<Int>>): Int {
+    fun detectMap(map: List<List<Cell>>) {
+        for (line in map) {
+            detectVisibleOnLine(line)
+            detectVisibleOnLine(line.reversed())
+        }
+
+        for (x in 0 until map.first().size) {
+            var column = mutableListOf<Cell>()
+            for (y in 0 until map.size) {
+                val cell = map.get(y).get(x)
+                column.add(cell)
+            }
+
+            detectVisibleOnLine(column)
+            detectVisibleOnLine(column.reversed())
+        }
+    }
+
+    fun countTotalVisible(map: List<List<Cell>>): Int {
         var res = 0
         for (y in 0 until map.size) {
-            val line = map.get(y)
-
-            for (x in 0 until line.size) {
-                val cell = line.get(x)
-                if (isVisible(map, x, y)) {
+            for (x in 0 until map.first().size) {
+                val cell = map.get(y).get(x)
+                if (cell.visible) {
                     res++
                 }
             }
@@ -67,6 +61,7 @@ fun main() {
 
     fun part1(input: List<String>): Int {
         val map = parseMap(input)
+        detectMap(map)
         val total = countTotalVisible(map)
         return total
     }
@@ -79,8 +74,8 @@ fun main() {
         return sum
     }
 
-//    val input = readInput("Day08")
-    val input = readInput("Day08_test")
+    val input = readInput("Day08")
+//    val input = readInput("Day08_test")
 
     val totalVisible = part1(input)
     println("How many trees are visible from outside the grid? $totalVisible")
