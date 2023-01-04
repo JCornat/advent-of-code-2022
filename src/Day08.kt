@@ -66,12 +66,61 @@ fun main() {
         return total
     }
 
-    fun part2(input: List<String>): Int {
-        var sum = 0
-        for (line in input) {
+    fun getScoreInList(list: List<Cell>, index: Int): Int {
+        var score = 0
+        val cell = list.get(index)
+        for (i in index + 1 until list.size) {
+            score++
+
+            val nextCell = list.get(i)
+            if (cell.height <= nextCell.height) {
+                break
+            }
         }
 
-        return sum
+        return score
+    }
+
+    fun scoreCell(row: List<Cell>, column: List<Cell>, x: Int, y: Int): Int {
+        if (x == 0 || y == 0 || x == row.size - 1 || y == column.size - 1) {
+            return 0
+        }
+
+        val top = getScoreInList(column.reversed(), column.size - 1 - y)
+        val right = getScoreInList(row, x)
+        val bottom = getScoreInList(column, y)
+        val left = getScoreInList(row.reversed(), row.size - 1 - x)
+
+        return top * right * bottom * left
+    }
+
+    fun scoreMap(map: List<List<Cell>>): Int {
+        var res = 0
+        for (y in 0 until map.size) {
+            val row = map.get(y)
+
+            for (x in 0 until map.first().size) {
+                var column = mutableListOf<Cell>()
+                for (y in 0 until map.size) {
+                    val cell = map.get(y).get(x)
+                    column.add(cell)
+                }
+
+                val score = scoreCell(row, column, x, y)
+                if (score > res) {
+                    res = score
+                }
+            }
+        }
+
+        return res
+    }
+
+    fun part2(input: List<String>): Int {
+        val map = parseMap(input)
+        detectMap(map)
+
+        return scoreMap(map)
     }
 
     val input = readInput("Day08")
@@ -80,6 +129,6 @@ fun main() {
     val totalVisible = part1(input)
     println("How many trees are visible from outside the grid? $totalVisible")
 
-//    val sum2 = part2(input)
-//    println("What is the sum of the priorities of those item types? $sum2")
+    val score = part2(input)
+    println("What is the highest scenic score possible for any tree? $score")
 }
